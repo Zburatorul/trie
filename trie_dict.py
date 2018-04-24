@@ -20,14 +20,10 @@ class Trie:
         root = self.root
         for char in word:
             if char not in root.keys():
-                #print(char)
-                #print(root.keys())
                 root[char] = {}
             root = root[char]
 
         if '.' not in root.keys():
-            #print('Adding %s' % word)
-            #print('at node %s' % root.keys())
             root['.'] = None
             self.counter += 1
 
@@ -74,7 +70,6 @@ class Trie:
                 vertices.append(root)
                 root = root[word[i]]
                 i += 1
-                #print('Found prefix %s' % word[:i])
             else:
                 return
 
@@ -114,16 +109,13 @@ class Trie:
         while True:
             children = root.keys()
 
-            ##print('Children are: ', children)
-
-            # if we have descended this may times, the current node
+            # if we have descended this many times, the current node
             # is the root of this prefix
             if i == len(prefix):
                 return root
             if prefix[i] in children:
                 root = root[prefix[i]]
                 i += 1
-                #print('Found prefix %s' % prefix[:i])
             else:
                 return None
 
@@ -136,7 +128,6 @@ class Trie:
 
         children = root.keys()
 
-        #print('Looking for words with', children)
         if len(children) == 0:
             return ['']
 
@@ -160,11 +151,7 @@ class Trie:
         # this prefix exists in the tree
         # now find all words originating at this node
 
-        #print('Found node for prefix %s' % prefix)
-        #print('Node char is %s' % prefix[-1])
-
         words = self.getWordsRelative(root)
-        #print('words=', words)
         if words == []:
             return [prefix]
         words = [ prefix + word for word in words]
@@ -183,6 +170,6 @@ if __name__ == "__main__":
     t.addWord('ablp')
     print(t.getWords('ab'))
     print(t.getWords('abl'))
-    print('Deleting abcd')
+    print('Deleting ab')
     t.deleteWord('ab')
     print(t.getWords('a'))
