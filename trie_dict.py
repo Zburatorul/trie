@@ -1,6 +1,7 @@
 '''
     A Trie implementation where each node is actually a dictionary.
-
+    The '.' key of a node signifies that a word ending on that very letter is present
+    in the tree.
 '''
 
 
@@ -16,14 +17,17 @@ class Trie:
         if len(word) == 0:
             return
 
-
         root = self.root
         for char in word:
             if char not in root.keys():
+                #print(char)
+                #print(root.keys())
                 root[char] = {}
             root = root[char]
 
         if '.' not in root.keys():
+            #print('Adding %s' % word)
+            #print('at node %s' % root.keys())
             root['.'] = None
             self.counter += 1
 
@@ -39,6 +43,9 @@ class Trie:
         '''
         Deletion is tricky because one must potentially delete many vertices.
         But must first inspect the final vertex.
+
+        First we descend to the node corresponding to the final letter of the word.
+        Then we walk back up deleting childless nodes.
         '''
 
         if len(word) == 0:
@@ -53,22 +60,15 @@ class Trie:
             if i == len(word):
                 # we have found the right node
                 # delete the '.'
+                # does nothing if key wasn't there
                 root.pop('.', None)
+                if len(root.keys()) > 0:
+                    # there are other valid children
+                    # nothing else to do
+                    return
 
-
-                # if this node is not a parent, delete it
-                while True:
-                    # walk back up the tree until we find another branch.
-                    node = vertices.pop()
-                    if len(node.keys) > 1:
-                        
-
-                    if node == self.root:
-                        self.root = {}
-                        return
-
-
-                return
+                # the bottom node is unneeded now, potentially more cleanup
+                break
 
             if word[i] in children:
                 vertices.append(root)
@@ -76,7 +76,32 @@ class Trie:
                 i += 1
                 #print('Found prefix %s' % word[:i])
             else:
-                return None
+                return
+
+
+        # Now we must walk back up the tree deleting unnecessary nodes.
+        node = vertices.pop() # start at second to bottom node
+        i -= 1
+
+        while node != self.root and len(node.keys()) == 1:
+            # walk back up the tree until we find another branch
+            # stop when branch or when reading tree root
+            node = vertices.pop()
+            i -= 1 # keep track of letter corresponding to node
+
+        # easy case
+        if node == self.root:
+            if len(node.keys()) == 1:
+                self.root = {}
+            else:
+                # at the root, but it has branches
+                node.pop(word[0], None)
+            return
+
+        # if here then there are at least two branches.
+        # remove the walk we walked
+        node.pop(word[i], None)
+
 
 
     def findNode(self, prefix):
@@ -89,7 +114,7 @@ class Trie:
         while True:
             children = root.keys()
 
-            #print('Children are: ', children)
+            ##print('Children are: ', children)
 
             # if we have descended this may times, the current node
             # is the root of this prefix
@@ -98,7 +123,7 @@ class Trie:
             if prefix[i] in children:
                 root = root[prefix[i]]
                 i += 1
-                print('Found prefix %s' % prefix[:i])
+                #print('Found prefix %s' % prefix[:i])
             else:
                 return None
 
@@ -139,7 +164,7 @@ class Trie:
         #print('Node char is %s' % prefix[-1])
 
         words = self.getWordsRelative(root)
-        print('words=', words)
+        #print('words=', words)
         if words == []:
             return [prefix]
         words = [ prefix + word for word in words]
@@ -151,14 +176,13 @@ class Trie:
 
 if __name__ == "__main__":
     t = Trie()
-    t.addWord('abld')
-    t.addWord('abcd')
+    #t.addWord('abld')
+    #t.addWord('abcd')
+    t.addWord('ab')
+    t.addWord('a')
     t.addWord('ablp')
     print(t.getWords('ab'))
-    t.addWord('ab')
-
-    #print(t.printAllWords())
-    print(t.getWords('ab'))
     print(t.getWords('abl'))
-    t.deleteWord('abcd')
-    print(t.getWords('ab'))
+    print('Deleting abcd')
+    t.deleteWord('ab')
+    print(t.getWords('a'))
